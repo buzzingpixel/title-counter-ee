@@ -79,6 +79,33 @@ class Title_counter_ext
         // Get any hook data already on this extension
         $hookData = ee()->extensions->last_call ?: '';
 
-        return "{$hookData}console.log('title_counter')";
+        $filePath = realpath(__DIR__) . '/resources/script.js';
+
+        if (! file_exists($filePath)) {
+            return $hookData;
+        }
+
+        $fileContents = file_get_contents($filePath);
+
+        $templatePath =  realpath(__DIR__) . '/resources/counterHtml.html';
+        $templateContents = '';
+
+        if (file_exists($templatePath)) {
+            $templateContents = file_get_contents($templatePath);
+        }
+
+        $var = 'window.TITLE_COUNTER_TEMPLATE = ' .
+            json_encode($templateContents) .
+            ';';
+
+        /** @var \EE_Config $eeConfig */
+        $eeConfig = ee()->config;
+
+        $limit = (int) $eeConfig->item('title_counter_limit');
+        $limit = $limit ?: 200;
+
+        $var2 = "window.TITLE_COUNTER_LIMIT = {$limit}";
+
+        return "{$hookData}\n\n{$var}\n\n{$var2}\n\n{$fileContents}";
     }
 }
