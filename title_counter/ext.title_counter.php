@@ -33,6 +33,16 @@ class Title_counter_ext
             'version' => TITLE_COUNTER_VER,
             'enabled' => 'y',
         ]);
+
+        $queryBuilder->insert('extensions', [
+            'class' => __CLASS__,
+            'method' => 'cp_css_end',
+            'hook' => 'cp_css_end',
+            'settings' => '',
+            'priority' => 10,
+            'version' => TITLE_COUNTER_VER,
+            'enabled' => 'y',
+        ]);
     }
 
     /**
@@ -107,5 +117,25 @@ class Title_counter_ext
         $var2 = "window.TITLE_COUNTER_LIMIT = {$limit}";
 
         return "{$hookData}\n\n{$var}\n\n{$var2}\n\n{$fileContents}";
+    }
+
+    /**
+     * Adds the CSS to the control panel
+     * @return string
+     */
+    public function cp_css_end()
+    {
+        // Get any hook data already on this extension
+        $hookData = ee()->extensions->last_call ?: '';
+
+        $filePath = realpath(__DIR__) . '/resources/style.css';
+
+        if (! file_exists($filePath)) {
+            return $hookData;
+        }
+
+        $fileContents = file_get_contents($filePath);
+
+        return "{$hookData}\n\n{$fileContents}";
     }
 }

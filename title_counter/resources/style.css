@@ -1,0 +1,15 @@
+.TitleCounter {
+    font-size: 11px;
+    margin-left: 2px;
+    margin-top: 6px;
+}
+
+.TitleCounter--Warning {
+    color: #b49502;
+    font-weight: bold;
+}
+
+.TitleCounter--LimitReached {
+    color: #b41302;
+    font-weight: bold;
+}
