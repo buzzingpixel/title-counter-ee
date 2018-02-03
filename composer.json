@@ -1,0 +1,32 @@
+{
+    "name": "buzzingpixel/title-counter-ee",
+    "version": "1.0.0",
+    "description": "Show the limit and character count on the title field in ExpressionEngine",
+    "type": "ee-add-on",
+    "authors": [
+        {
+            "name": "TJ Draper",
+            "email": "tj@buzzingpixel.com",
+            "homepage": "https://buzzingpixel.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:tjdraper/expressionengine.git"
+        }
+    ],
+    "require-dev": {
+        "tjdraper/expressionengine": "^4.0.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "buzzingpixel\\titlecounter\\": "title_counter",
+            "EllisLab\\" : "vendor/tjdraper/expressionengine/src/system/ee/EllisLab"
+        }
+    },
+    "extra": {
+        "handle": "title_counter",
+        "systemPath": "title_counter"
+    }
+}

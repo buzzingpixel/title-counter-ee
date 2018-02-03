@@ -1,0 +1,231 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Set project variables
+ */
+
+$projPath = realpath(__DIR__);
+$vendorPath = $projPath . '/vendor/*';
+
+$isVagrant = false;
+
+foreach (explode(DIRECTORY_SEPARATOR, $projPath) as $item) {
+    if ($item !== 'vagrant') {
+        continue;
+    }
+    $isVagrant = true;
+}
+
+$relativeSysPath = 'libraries/ExpressionEngine/system';
+$relativeThemesPath = 'libraries/ExpressionEngine/themes';
+$stashStaticCacheRelativePath = 'libraries/ExpressionEngine/cache';
+
+$cacheSymLink = false;
+if ($isVagrant) {
+    $cacheSymLink = '/home/vagrant/special/cache';
+}
+
+
+/**
+ * Make sure all necessary directories exist
+ */
+
+if ($stashStaticCacheRelativePath) {
+    if (! is_dir("{$projPath}{$stashStaticCacheRelativePath}")) {
+        exec("mkdir -p {$projPath}/{$stashStaticCacheRelativePath}");
+    }
+
+    exec("sudo chmod -R 0777 {$projPath}/{$stashStaticCacheRelativePath}");
+}
+
+if (! is_dir("{$projPath}/{$relativeSysPath}/user/addons")) {
+    exec("mkdir -p {$projPath}/{$relativeSysPath}/user/addons");
+}
+
+if (! $cacheSymLink && ! is_dir("{$projPath}/{$relativeSysPath}/user/cache")) {
+    exec("mkdir -p {$projPath}/{$relativeSysPath}/user/cache");
+}
+
+if ($cacheSymLink) {
+    if (! is_dir($cacheSymLink)) {
+        exec("mkdir -p {$cacheSymLink}");
+    }
+    exec("sudo chmod -R 0777 {$cacheSymLink}");
+
+    if (is_dir("{$projPath}/{$relativeSysPath}/user/cache") ||
+        file_exists("{$projPath}/{$relativeSysPath}/user/cache")
+    ) {
+        exec("sudo rm -rf {$projPath}/{$relativeSysPath}/user/cache");
+    }
+} else {
+    exec("sudo chmod -R 0777 {$projPath}/{$relativeSysPath}/user/cache");
+}
+
+if (! is_dir("{$projPath}/{$relativeSysPath}/user/config")) {
+    exec("mkdir -p {$projPath}/{$relativeSysPath}/user/config");
+}
+
+if (! file_exists("{$projPath}/{$relativeSysPath}/user/config/config.php")) {
+    exec("touch {$projPath}/{$relativeSysPath}/user/config/config.php");
+}
+
+if (! is_dir("{$projPath}/{$relativeSysPath}/user/templates")) {
+    exec("mkdir -p {$projPath}/{$relativeSysPath}/user/templates");
+}
+exec("sudo chmod -R 0777 {$projPath}/{$relativeSysPath}/user/templates");
+
+if (! is_dir("{$projPath}/{$relativeThemesPath}/user")) {
+    exec("mkdir -p {$projPath}/{$relativeThemesPath}/user");
+}
+
+
+/**
+ * Symlink EE Composer files into place
+ */
+
+// EE System directory
+if (is_link("{$projPath}/{$relativeSysPath}/ee") ||
+    file_exists("{$projPath}/{$relativeSysPath}/ee") ||
+    is_dir("{$projPath}/{$relativeSysPath}/ee")
+) {
+    exec("sudo rm -rf {$projPath}/{$relativeSysPath}/ee");
+}
+symlink(
+    "{$projPath}/vendor/tjdraper/expressionengine/src/system/ee",
+    "{$projPath}/{$relativeSysPath}/ee"
+);
+
+// EE Themes directory
+if (is_link("{$projPath}/{$relativeThemesPath}/ee") ||
+    file_exists("{$projPath}/{$relativeThemesPath}/ee") ||
+    is_dir("{$projPath}/{$relativeThemesPath}/ee")
+) {
+    exec("sudo rm -rf {$projPath}/{$relativeThemesPath}/ee");
+}
+symlink(
+    "{$projPath}/vendor/tjdraper/expressionengine/src/themes/ee",
+    "{$projPath}/{$relativeThemesPath}/ee"
+);
+
+// Set permissions on installer directory
+if (is_dir("{$projPath}/vendor/tjdraper/expressionengine/src/system/ee/installer")) {
+    exec("sudo chmod 0777 {$projPath}/vendor/tjdraper/expressionengine/src/system/ee");
+    exec("sudo chmod -R 0777 {$projPath}/vendor/tjdraper/expressionengine/src/system/ee/installer");
+}
+
+// Check of symlink of cache dir
+if ($cacheSymLink) {
+    symlink(
+        $cacheSymLink,
+        "{$projPath}/{$relativeSysPath}/user/cache"
+    );
+}
+
+
+/**
+ * Symlink any composer dependency managed add-ons
+ */
+
+// Remove existing symlinks first
+foreach (glob("{$projPath}/{$relativeSysPath}/user/addons/*") as $link) {
+    if (! is_link($link)) {
+        continue;
+    }
+    exec("sudo rm -rf {$link}");
+}
+
+$addonSystemGitIgnore = [];
+$addonThemeGitIgnore = [];
+
+foreach (glob($vendorPath) as $dir) {
+    if (! is_dir($dir)) {
+        continue;
+    }
+
+    $globPattern = "{$dir}/*";
+
+    foreach (glob($globPattern) as $vendorDir) {
+        if (! is_dir($vendorDir)) {
+            continue;
+        }
+
+        $composerJsonPath = "{$vendorDir}/composer.json";
+
+        if (! is_file($composerJsonPath)) {
+            continue;
+        }
+
+        $composerArr = json_decode(file_get_contents($composerJsonPath), true);
+
+        if (! isset(
+                $composerArr['type'],
+                $composerArr['extra']['handle']
+            ) ||
+            $composerArr['type'] !== 'ee-add-on'
+        ) {
+            continue;
+        }
+
+        if (isset($composerArr['extra']['systemPath'])) {
+            $pathFrom = "{$vendorDir}/{$composerArr['extra']['systemPath']}";
+            $path = "/{$relativeSysPath}/user/addons/{$composerArr['extra']['handle']}";
+            $pathTo = "{$projPath}{$path}";
+            if (is_link($pathTo)) {
+                exec("sudo rm -rf {$pathTo}");
+            }
+            symlink($pathFrom, $pathTo);
+            $addonSystemGitIgnore[] = $composerArr['extra']['handle'];
+        }
+
+        if (isset($composerArr['extra']['themePath'])) {
+            $pathFrom = "{$vendorDir}/{$composerArr['extra']['themePath']}";
+            $path = "/{$relativeThemesPath}/user/{$composerArr['extra']['handle']}";
+            $pathTo = "{$projPath}{$path}";
+            if (is_link($pathTo)) {
+                exec("sudo rm -rf {$pathTo}");
+            }
+            symlink($pathFrom, $pathTo);
+            $addonThemeGitIgnore[] = $composerArr['extra']['handle'];
+        }
+    }
+}
+
+file_put_contents(
+    "{$projPath}/{$relativeSysPath}/user/addons/.gitignore",
+    implode("\n", $addonSystemGitIgnore) . "\n"
+);
+
+file_put_contents(
+    "{$projPath}/{$relativeThemesPath}/user/.gitignore",
+    implode("\n", $addonThemeGitIgnore) . "\n"
+);
+
+
+/**
+ * Symlink addon files
+ */
+
+// Vendor
+// if (is_link("{$projPath}/typeset/vendor") ||
+//     file_exists("{$projPath}/typeset/vendor") ||
+//     is_dir("{$projPath}/typeset/vendor")
+// ) {
+//     exec("sudo rm -rf {$projPath}/typeset/vendor");
+// }
+// symlink(
+//     "{$projPath}/vendor",
+//     "{$projPath}/typeset/vendor"
+// );
+
+// System
+if (is_link("{$projPath}/{$relativeSysPath}/user/addons/title_counter") ||
+    file_exists("{$projPath}/{$relativeSysPath}/user/addons/title_counter") ||
+    is_dir("{$projPath}/{$relativeSysPath}/user/addons/title_counter")
+) {
+    exec("sudo rm -rf {$projPath}/{$relativeSysPath}/user/addons/title_counter");
+}
+symlink(
+    "{$projPath}/title_counter",
+    "{$projPath}/{$relativeSysPath}/user/addons/title_counter"
+);

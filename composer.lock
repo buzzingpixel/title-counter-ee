@@ -1,0 +1,40 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "bfcd831001ec9d70a158f5aff2aa156a",
+    "packages": [],
+    "packages-dev": [
+        {
+            "name": "tjdraper/expressionengine",
+            "version": "4.0.8",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:tjdraper/expressionengine.git",
+                "reference": "a1018323a36242babd23a42faeb59eff70b54ce2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tjdraper/expressionengine/zipball/a1018323a36242babd23a42faeb59eff70b54ce2",
+                "reference": "a1018323a36242babd23a42faeb59eff70b54ce2",
+                "shasum": ""
+            },
+            "type": "library",
+            "description": "ExpressionEngine - dependency managed",
+            "support": {
+                "source": "https://github.com/tjdraper/expressionengine/tree/4.0.8",
+                "issues": "https://github.com/tjdraper/expressionengine/issues"
+            },
+            "time": "2018-01-26T02:18:39+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

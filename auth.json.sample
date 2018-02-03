@@ -1,0 +1,5 @@
+{
+    "github-oauth": {
+        "github.com": "<YOUR_GITHUB_AUTH_KEY_HERE>"
+    }
+}
