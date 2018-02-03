@@ -17,7 +17,7 @@ if (file_exists($vendorAutoloadFile)) {
     require $vendorAutoloadFile;
 }
 
-defined('TITLE_COUNTER_VER') || define('TITLE_COUNTER_VER', '1.0.0');
+defined('TITLE_COUNTER_VER') || define('TITLE_COUNTER_VER', '1.0.1');
 
 return [
     'author' => 'TJ Draper',

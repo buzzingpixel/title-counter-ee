@@ -1,6 +1,6 @@
 {
     "name": "buzzingpixel/title-counter-ee",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Show the limit and character count on the title field in ExpressionEngine",
     "type": "ee-add-on",
     "authors": [
@@ -10,6 +10,7 @@
             "homepage": "https://buzzingpixel.com"
         }
     ],
+    "license": "Apache-2.0",
     "repositories": [
         {
             "type": "vcs",

@@ -48,12 +48,17 @@ function runTitleCounter() {
         return;
     }
 
+    $title = $('[name="title"]');
+
+    if (! $title.length) {
+        return;
+    }
+
     theLimit = window.TITLE_COUNTER_LIMIT;
     warningLevel = theLimit * 0.65;
     $counterWrap = $(window.TITLE_COUNTER_TEMPLATE);
     $count = $counterWrap.find('.JSTitleCounter__Count');
     $limit = $counterWrap.find('.JSTitleCounter__Limit');
-    $title = $('[name="title"]');
 
     $title.prop('maxlength', theLimit);
 
